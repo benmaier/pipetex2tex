@@ -13,12 +13,11 @@ setup(
     author_email=__email__,
     url='https://github.com/benmaier/pipetex2tex',
     license=__license__,
-    description="A short description of the package.",
+    description=r"CL tool to convert tex-files that contain \input{|command} with the actual output of these commands.",
     long_description='',
     packages=setuptools.find_packages(),
     python_requires='>=3.6',
     install_requires=[
-                'numpy>=1.17',
     ],
     tests_require=['pytest', 'pytest-cov'],
     setup_requires=['pytest-runner'],
@@ -34,6 +33,11 @@ setup(
         'Source': 'https://github.com/benmaier/pipetex2tex/',
         'PyPI': 'https://pypi.org/project/pipetex2tex/',
     },
+    entry_points = {
+          'console_scripts': [
+                  'pipetex2tex = pipetex2tex.cli:main',
+              ],
+        },
     include_package_data=True,
     zip_safe=False,
 )
