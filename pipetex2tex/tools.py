@@ -25,7 +25,7 @@ def _extract_command_from_within_brackets(text):
 
     return text
 
-def run_command(cmd):
+def _run_command(cmd):
     proc = Popen(cmd,shell=True,stdout=PIPE,stderr=PIPE)
     out, err = proc.communicate()
     if proc.wait() != 0:
@@ -40,9 +40,33 @@ def run_command(cmd):
     return output, success
 
 def convert(tex):
-    """
-    For explanation of regexp expression, check
+    r"""
+    Finds all instances of a tex-command input in a
+    string, runs the contained commands as subprocesses
+    and replaces the tex-commands with the respective
+    results of the run.
+
+    Explicitly, it matches the input against
+    the regexp (\\inp|\\input)?\s*{\s*\|.*}.
+
+    For an explanation of the regexp, check
     https://regexr.com/72k51
+
+    Prints out all errors by commands and raises
+    a ValueError at the end if there was any errors
+    in the commands.
+
+    Parameters
+    ==========
+    tex : str
+        The string containing tex source.
+
+    Returns
+    =======
+    new_tex : str
+        String that matches ``tex``, but every
+        occurrence of an ``\input{|command}`` was
+        replaced by the output of ``command``.
     """
     input_regexp = r"(\\inp|\\input)?\s*{\s*\|.*}"
     pattern = re.compile(input_regexp)
@@ -59,7 +83,7 @@ def convert(tex):
             span = m.span()
             this_match = m.group()
             command = _extract_command_from_within_brackets(this_match)
-            output, success = run_command(command)
+            output, success = _run_command(command)
             overall_success = overall_success and success
             if not success:
                 print("====================================")
