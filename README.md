@@ -2,42 +2,43 @@
 
 CLI to convert LaTeX source with piped `\input{|...}` commands into pure LaTeX.
 
+## Install
+
+    pip install pipetex2tex
+
 ## Usage
+
+    pipetex2tex manuscript.tex > manuscript_with_executed_commands.tex
+    cat manuscript.tex | pipetex2tex > manuscript_cmds.tex
+
+Or in python:
 
 ```python
 import pipetex2tex as p2t
 
 tex = "There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year."
-print(tex)
-print(p2t.convert(tex))
+print("source:", tex)
+print("out   :", p2t.convert(tex), '\n')
 
 tex = "There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory."
-print("\n"+tex)
-print(p2t.convert(tex))
+print("source:", tex)
+print("out   :", p2t.convert(tex))
+
 ```
 
 Results in
 
-Or in the command line as
+    source: There's \inp{|python -c 'print(int(24*60*60*365.25))'} seconds in a year.
+    out   : There's 31557600 seconds in a year.
 
-    pipetex2tex manuscript.tex > manuscript_with_executed_commands.tex
+    source: There's $\input { | ls -al ~ | wc -l }$ files/directories in your user directory.
+    out   : There's $      62$ files/directories in your user directory.
 
-This works too
-
-    cat manuscript.tex | pipetex2tex > manuscript_cmds.tex
-
-## Install
-
-    pip install pipetex2tex
-
-So far, the package's functionality was tested on Mac OSx only.
 
 ## Dependencies
 
-`pipetex2tex` only uses the Python standard library
-
+`pipetex2tex` only uses the Python standard library.
 
 ## License
 
 This project is licensed under the [MIT License](https://github.com/benmaier/pipetex2tex/blob/main/LICENSE).
-Note that this excludes any images/pictures/figures shown here or in the documentation.
