@@ -1,5 +1,6 @@
 import re
 from subprocess import Popen, PIPE
+import sys
 
 def _extract_command_from_within_brackets(text):
 
@@ -47,7 +48,7 @@ def convert(tex):
     results of the run.
 
     Explicitly, it matches the input against
-    the regexp (\\inp|\\input)?\s*{\s*\|.*}.
+    the regexp (\\inp|\\input)?\s*{\s*\|.*?}.
 
     For an explanation of the regexp, check
     https://regexr.com/72k51
@@ -68,7 +69,7 @@ def convert(tex):
         occurrence of an ``\input{|command}`` was
         replaced by the output of ``command``.
     """
-    input_regexp = r"(\\inp|\\input)?\s*{\s*\|.*}"
+    input_regexp = r"(\\inp|\\input)?\s*{\s*\|.*?}"
     pattern = re.compile(input_regexp)
     pos = 0
     overall_success = True
@@ -81,18 +82,20 @@ def convert(tex):
             break
         if m not in found_matches:
             span = m.span()
-            this_match = m.group()
+            this_match = str(m.group())
             command = _extract_command_from_within_brackets(this_match)
             output, success = _run_command(command)
             overall_success = overall_success and success
             if not success:
-                print("====================================")
-                print("An error occured for input command "+this_match+" at position "+str(span[0])+".")
-                print("Context:")
-                print("   ..."+tex[max(0,span[0]-20):span[1]+20]+"...")
-                print("this is the error message:")
-                print(output)
-                print("====================================\n")
+                err = ""
+                err += "====================================\n"
+                err += "An error occured for input command "+this_match+" at position "+str(span[0])+".\n"
+                err += "Context:\n"
+                err += "   ..."+tex[max(0,span[0]-20):span[1]+20]+"...\n"
+                err += "this is the error message:\n"
+                err += output + '\n'
+                err += "====================================\n\n"
+                sys.stderr.write(err)
             else:
                 newtex = newtex.replace(this_match, output)
 
@@ -117,6 +120,12 @@ if __name__ == "__main__":
         I'll try converting this \inp{|python -c "print('hi(inp)')"}
         I'll try converting this \inp  {  |    python -c "print('hi(inp)')"}
     """
+    result = convert(tex)
+    print(result)
+
+    tex3 = r"\input{|python ../cookbook/example.py}dingdongwallawallabingbanf\input{|python ../cookbook/example.py}"
+    result = convert(tex3)
+    print(result)
 
     tex2 = r"""
         This is a {\bf test}.
@@ -130,8 +139,5 @@ if __name__ == "__main__":
 
 
 
-    result = convert(tex)
-    print(result)
     convert(tex2)
-    
 
